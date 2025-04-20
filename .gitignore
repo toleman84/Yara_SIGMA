@@ -1,0 +1,45 @@
+# Logs y Salidas
+*.Logs
+*.out
+*.tmp
+
+# Archivos de reglas convertidas
+converted-rules/
+
+# Archivos compilados de YARA (opcionales)
+*.yarc
+
+# Directorios de volúmenes temporales
+volumes/
+data/
+tmp/
+
+# Configs sensibles o específicos del entorno
+.env
+.env.*
+
+# Archivos del sistema y editores
+-DS_Store
+Thumbs.db
+*.swo
+*.bak
+.idea/
+.vscode/
+*.code-workspace
+
+# Archivos de Docker
+**/__pycache__/
+docker-compose.overrida.yml
+
+# Repositorios clonados (Atomic Red Team, Sigma)
+atomic-red-team/
+sigma-dev/sigma/
+yara-dev/yara/
+
+# Archivos del build de docker
+*.tar
+*.img
+*.qcow2
+
+# Permitir archivos vacíos necesarios para estructura
+!.gitkeep
