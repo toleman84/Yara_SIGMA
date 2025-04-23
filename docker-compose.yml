@@ -1,0 +1,67 @@
+version: '3.9'
+
+networks:
+  wazuh-net:
+    driver: bridge
+
+volumes:
+  yara-rules
+  sigma-rules
+
+services:
+  wazuh-manager:
+    image: wazuh/wazuh-manager:latest
+    container_name: wazuh-manager
+    networks:
+      - wazuh-net
+    ports:
+      - "1514:1514/udp"
+      - "1515:1515"
+    volumes:
+      - yara-rules:/var/ossec/ruleset/rules
+      - sigma-rules:/var/ossec/ruleset/rules
+    environment:
+      - WAZUH_PASSWORD=Secret123
+  
+  wazuh-agent:
+    image: wazuh/wazuh-agent:latest
+    container_name: wazuh-agent
+    depends_on:
+      - wazuh-manager
+    networks:
+      - wazuh-net
+    environment:
+      - MANAGER_IP=wazuh-manager
+    volumes:
+    - ./atomic-red-team:/atomic
+  
+  yara-dev:
+    image: your-yara-image
+    container_name: yara-dev
+    networks:
+      - wazuh-net
+    volumes:
+      - yara-rules:/rules
+    command: 
+      - /bin/bash
+      - -c
+      - |
+        while true; do
+          sleep 3600
+        done
+  
+  sigma-dev:
+    image: your-sigma-image
+    container_name: sigma-dev
+    networks:
+      - wazuh-net
+    volumes:
+      - ./sigma-rules-src:/sigma-src
+      - sigma-rules:/converted
+    command: 
+      - /bin/bash
+      - -c
+      - |
+        while true; do
+          sleep 3600
+        done
