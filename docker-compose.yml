@@ -51,7 +51,7 @@ services:
         done
   
   sigma-dev:
-    image: your-sigma-image
+    image: sigma-converter
     container_name: sigma-dev
     networks:
       - wazuh-net
