@@ -5,12 +5,12 @@ networks:
     driver: bridge
 
 volumes:
-  yara-rules
-  sigma-rules
+  yara-rules: {}
+  sigma-rules: {}
 
 services:
   wazuh-manager:
-    image: wazuh/wazuh-manager:latest
+    image: wazuh/wazuh-manager:4.4.0
     container_name: wazuh-manager
     networks:
       - wazuh-net
@@ -18,13 +18,13 @@ services:
       - "1514:1514/udp"
       - "1515:1515"
     volumes:
-      - yara-rules:/var/ossec/ruleset/rules
-      - sigma-rules:/var/ossec/ruleset/rules
+      - yara-rules:/var/ossec/ruleset/yara-rules
+      - sigma-rules:/var/ossec/ruleset/sigma-rules
     environment:
       - WAZUH_PASSWORD=Secret123
   
   wazuh-agent:
-    image: wazuh/wazuh-agent:latest
+    image: wazuh/wazuh-agent:4.4.0
     container_name: wazuh-agent
     depends_on:
       - wazuh-manager
@@ -36,12 +36,13 @@ services:
     - ./atomic-red-team:/atomic
   
   yara-dev:
-    image: your-yara-image
+    image: yara-dev-env
     container_name: yara-dev
     networks:
       - wazuh-net
     volumes:
-      - yara-rules:/rules
+      - ./rules/yara:/rules
+      - ./yara-dev/scan.sh:/yara/scan.sh
     command: 
       - /bin/bash
       - -c
@@ -56,8 +57,9 @@ services:
     networks:
       - wazuh-net
     volumes:
-      - ./sigma-rules-src:/sigma-src
-      - sigma-rules:/converted
+      - ./rules/sigma:/sigma-src
+      - ./converted-rules:/converted
+      - ./sigma-dev/convert.sh:/opt/sigma/convert.sh
     command: 
       - /bin/bash
       - -c
