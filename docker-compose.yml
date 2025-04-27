@@ -9,31 +9,48 @@ volumes:
   sigma-rules: {}
 
 services:
+  wazuh-indexer:
+    image: wazuh/wazuh-indexer:4.4.0
+    container_name: wazuh-indexer
+    networks:
+      - wazuh-net
+    environment:
+      - INDEXER_MEM=512m
+      - node.name=wazuh-indexer
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    ports:
+      - "9200:9200"
+      - "9300:9300"
   wazuh-manager:
     image: wazuh/wazuh-manager:4.4.0
     container_name: wazuh-manager
     networks:
       - wazuh-net
+    environment:
+      - INDEXER_URL=https://wazuh-indexer:9200
+      - WAZUH_PASSWORD=Secret123
     ports:
       - "1514:1514/udp"
       - "1515:1515"
-    volumes:
-      - yara-rules:/var/ossec/ruleset/yara-rules
-      - sigma-rules:/var/ossec/ruleset/sigma-rules
-    environment:
-      - WAZUH_PASSWORD=Secret123
-  
-  wazuh-agent:
-    image: wazuh/wazuh-agent:4.4.0
-    container_name: wazuh-agent
     depends_on:
-      - wazuh-manager
+      - wazuh-indexer
+  wazuh-dashboard:
+    image: wazuh/wazuh-dashboard:4.4.0
+    container_name: wazuh-dashboard
     networks:
       - wazuh-net
     environment:
-      - MANAGER_IP=wazuh-manager
-    volumes:
-    - ./atomic-red-team:/atomic
+      - INDEXER_URL=https://wazuh-indexer:9200
+      - DASHBOARD_PASSWORD=Secret123
+    ports:
+      - "5601:5601"
+    depends_on:
+      - wazuh-indexer
   
   yara-dev:
     image: yara-dev-env
