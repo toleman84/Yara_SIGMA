@@ -2,6 +2,7 @@ PROJECT_NAME=wazuh-threat-hunting
 SIGMA_IMAGE=sigma-converter
 YARA_IMAGE=yara-dev-env
 COMPOSE=docker-compose -p $(PROJECT_NAME) -f docker-compose.yml
+CONTAINERS = wazuh-indexer wazuh-manager wazuh-dashboard yara-dev sigma-dev
 
 # 🔧 Build custom containers
 build:
@@ -20,13 +21,6 @@ down:
 	@echo "[+] Deteniendo contenedores..."
 	$(COMPOSE) down
 
-# 🧹 Limpiar volúmenes y red
-clean: down
-	@echo "[+] Borrando volúmenes y red del entorno..."
-	docker volume rm $(PROJECT_NAME)_sigma-rules || true
-	docker volume rm $(PROJECT_NAME)_yara-rules || true
-	docker network rm $(PROJECT_NAME)_wazuh-net || true
-
 # 🧪 Ejecutar conversión Sigma → Wazuh
 convert-sigma:
 	@echo "[*] Ejecutando conversión de reglas Sigma..."
@@ -41,3 +35,26 @@ scan-yara:
 shell-%:
 	@echo "[*] Accediendo a contenedor $*..."
 	docker exec -it $* bash
+
+.PHONY: start stop restart status
+
+# Solo levantar los contenedores existentes
+start:
+	@echo "[+] Iniciando contenedores existentes..."
+	docker start $(CONTAINERS)
+
+# Detener los contenedores
+stop:
+	@echo "[+] Deteniendo contenedores..."
+	docker stop $(CONTAINERS)
+
+# Detener y luego iniciar
+restart:
+	@echo "[+] Reiniciando contenedores..."
+	make stop
+	make start
+
+# Verificar el estado
+status:
+	@echo "[+] Estado de los contenedores:"
+	docker ps -a --filter "name=wazuh" --filter "name=yara-dev" --filter "name=sigma-dev"

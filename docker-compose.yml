@@ -77,10 +77,4 @@ services:
       - ./rules/sigma:/sigma-src
       - ./converted-rules:/converted
       - ./sigma-dev/convert.sh:/opt/sigma/convert.sh
-    command: 
-      - /bin/bash
-      - -c
-      - |
-        while true; do
-          sleep 3600
-        done
+    command: bash -c "while true; do sleep 3600; done"
