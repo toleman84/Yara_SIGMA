@@ -53,7 +53,7 @@ services:
       - wazuh-indexer
   
   yara-dev:
-    image: yara-dev-env
+    build: ./yara-dev
     container_name: yara-dev
     networks:
       - wazuh-net
