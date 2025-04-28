@@ -20,4 +20,4 @@ RUN pip install sigma-cli PyYAML jsonschema
 
 # Comando por defecto (ayuda de sigma)
 ENTRYPOINT ["sigma"]
-CMD ["--help"]
+CMD ["sh", "-c", "while sleep 3600; do :; done"]
